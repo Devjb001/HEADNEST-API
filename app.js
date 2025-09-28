@@ -2,6 +2,8 @@ const express = require('express');
 const passport = require('passport');
 require("dotenv").config()
 const app = express()
+const userRoutes = require('./src/routes/userRoutes');
+
 
 
 // imported files
@@ -28,6 +30,7 @@ connectToDataBase()
 // Routes
 app.use('/api', googleAuthRoutes);
 app.use('/api', authRoutes);
+app.use('/api', userRoutes);
 app.use('/api/journals', journalRoutes);
 app.use('/api', moodRoutes);
 app.use('/api', communityRoutes);
@@ -39,7 +42,20 @@ app.use('/api', therapyChatRoutes)
 app.get("/", (req , res) => {
     logger.info("Home route accessed")
     res.status(200).send("This is home route, pls select a route to perform an action")
-})
+});
+
+
+
+app.get('/health', (req, res) => {
+    res.send('OK');
+});
+
+// Routes
+//app.use('/auth', googleAuthRoutes);
+//app.use('/users', userRoutes);
+//app.use('/auth', userRoutes);
+
+
 
 app.get("/error", (req, res) => {
   logger.error("Something went wrong");

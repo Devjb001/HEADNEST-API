@@ -7,6 +7,9 @@ const emailQueue = require('../../queue');
 require('dotenv').config();
 
 const router = express.Router();
+console.log(`clientID:`, process.env.GOOGLE_CLIENT_ID)
+console.log(`clientSecret:`, process.env.GOOGLE_CLIENT_SECRET)
+
 
 // Passport Google Strategy
 passport.use(

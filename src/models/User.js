@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
  password: {
-    type: String
+    type: String,
+    default:null
     },
  googleId: { 
     type: String,
@@ -50,15 +51,31 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
   if (this.isModified('password') && this.password) {
     this.password = await bcrypt.hash(this.password, 10);
+ 
   }
   next();
 });
 
-
-
 // Comparing the password entered password with stored hash
 userSchema.methods.comparePassword = async function (enteredPassword) {
+  // Ensure a password exists on the user document before attempting comparison
+  if (!this.password) {
+    return false; // No password to compare against
+  
+  }
+ 
+ 
   return bcrypt.compare(enteredPassword, this.password);
 };
+
+
+userSchema.methods.generateAuthToken = function () {
+  // The payload of the JWT typically includes the user's ID
+  const token = jwt.sign({ id: this._id }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN // Token expires after this duration (e.g., '1h', '7d')
+  });
+  return token;
+};
+
 
 module.exports = mongoose.model('User', userSchema);
