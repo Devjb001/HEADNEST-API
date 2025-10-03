@@ -188,7 +188,7 @@ const sendUpcomingAppointmentReminders = async (req, res) => {
     });
     
     console.log(`Reminder email sent successfully to ${userEmail} for ${upcomingAppointments.length} appointments.`);
-    return;
+    return res.status(200).json(message: `Reminder email sent successfully to ${userEmail} for ${upcomingAppointments.length} appointments.`);
 
   } catch (err) {
     console.error(`ERROR processing reminders for user ${userID}:`, err);
