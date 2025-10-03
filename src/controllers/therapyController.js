@@ -124,7 +124,7 @@ const getUserAppointments = async (req, res) => {
 const bookAppointment = async (req, res) => {
   try {
     const userID = req.user.id;
-    const { therapistID, datetime, duration, note } = req.body;
+    const { therapistID, datetime, duration, note, type } = req.body;
 
     if (!therapistID || !datetime || !duration) {
       return res.status(400).json({ message: 'Missing required fields: therapistID, datetime, and duration.' });
@@ -144,6 +144,7 @@ const bookAppointment = async (req, res) => {
       datetime: datetime,
       duration: duration,
       note: note || '',
+	  type
     });
 
     res.status(201).json({ 
