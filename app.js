@@ -1,7 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 require("dotenv").config()
-// const agenda = require("./src/config/agenda");
+const agenda = require("./src/config/agenda");
 require("./src/jobs/sendReminders");
 const app = express();
 
