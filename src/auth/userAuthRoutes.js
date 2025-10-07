@@ -22,9 +22,9 @@ router.get('/user/auth/profile', authMiddleware, getProfile);
 
 router.put('/user/auth/profile', authMiddleware, updateProfile);
 
-router.put('user/auth/settings', authMiddleware, updateSettings);
+router.put('/user/auth/settings', authMiddleware, updateSettings);
 
-router.delete("user/auth/delete", authMiddleware, deleteAccount);
+router.delete("/user/auth/delete", authMiddleware, deleteAccount);
 
 router.post("/user/auth/token/refresh", authController.tokenRefresh);
 
