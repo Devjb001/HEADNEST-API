@@ -12,7 +12,7 @@ const sendVerificationLink = require("../middlewares/validateEmail");
 // REGISTER ACCOUNT
 // =========================
 exports.register = async (req, res) => {
-  const { name, email, password, googleId, role, ...therapistData } = req.body;
+  const { name, anonymousName, email, password, googleId, role, ...therapistData } = req.body;
 
   try {
     // Check if user already exists
@@ -32,6 +32,7 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
+      anonymousName: anonymousName.toLowerCase(),
       googleId: googleId || null,
       role,
       ...therapistData,
