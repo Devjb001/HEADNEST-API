@@ -2,6 +2,8 @@ const express = require('express');
 const passport = require('passport');
 require("dotenv").config()
 require("./src/jobs/sendReminders");
+const cors = require('cors');
+
 const app = express();
 
 
@@ -25,6 +27,11 @@ const agenda = require('./src/config/agenda');
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 
 //connecting to database

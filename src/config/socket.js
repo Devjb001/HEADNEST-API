@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 const TherapyChat = require('../models/TherapyChat');
+require('dotenv').config();
 
 // Socket authentication middleware
 const authenticateSocket = async (socket, next) => {
