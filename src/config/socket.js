@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const therapyChatSocketHandler = require('../socketHandlers/therapyChatSocket');
 
-const communityHandlers = require('./anonymousCommununityChatroomSocketHandlers.js');
+const anonCommunityChatSocketHandlers = require('../socketHandlers/anonCommunityChat');
 
 // Socket authentication middleware
 const authenticateSocket = async (socket, next) => {
@@ -42,7 +42,7 @@ const initializeSocket = (server) => {
   // Apply authentication middleware
   io.use(authenticateSocket);
 
-  communityHandlers(io); 
+  anonCommunityChatSocketHandlers(io); 
 
   // Handle connections
   io.on('connection', (socket) => {
