@@ -5,6 +5,8 @@ const User = require('../models/User');
 const Appointment = require('../models/Appointment');
 const TherapyChat = require('../models/TherapyChat');
 
+const communityHandlers = require('./anonymousCommununityChatroomSocketHandlers.js');
+
 // Socket authentication middleware
 const authenticateSocket = async (socket, next) => {
   try {
@@ -41,6 +43,8 @@ const initializeSocket = (server) => {
 
   // Apply authentication middleware
   io.use(authenticateSocket);
+
+  communityHandlers(io); 
 
   io.on('connection', (socket) => {
     console.log(`User ${socket.user.name} connected: ${socket.id}`);
