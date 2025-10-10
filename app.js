@@ -2,6 +2,8 @@ const express = require('express');
 const passport = require('passport');
 require("dotenv").config()
 require("./src/jobs/sendReminders");
+const cors = require('cors');
+
 const app = express();
 
 
@@ -26,6 +28,11 @@ const agenda = require('./src/config/agenda');
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -65,9 +72,21 @@ app.get("/", (req , res) => {
     res.status(200).send("This is home route, pls select a route to perform an action")
 })
 
-app.get("/error", (req, res) => {
-  logger.error("Something went wrong");
-  res.status(500).send("Error happened!");
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
 
 module.exports = app;
