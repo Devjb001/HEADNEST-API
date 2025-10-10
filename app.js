@@ -66,9 +66,21 @@ app.get("/", (req , res) => {
     res.status(200).send("This is home route, pls select a route to perform an action")
 })
 
-app.get("/error", (req, res) => {
-  logger.error("Something went wrong");
-  res.status(500).send("Error happened!");
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    success: false,
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
 
 module.exports = app;
