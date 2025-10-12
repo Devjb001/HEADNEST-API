@@ -1,4 +1,5 @@
 
+const User = require('../models/User.js');
 const Therapist = require('../models/Therapist');
 const Appointment = require('../models/Appointment');
 const mongoose = require('mongoose');
@@ -33,6 +34,43 @@ const getAllTherapists = async (req, res) => {
     res.status(500).json({error: err.message})
   }
 };
+
+// POST /therapists
+const onboardTherapist = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		const { name, specialization, description, qualifications, rate, avatar } = req.body;
+
+		console.log(req.body);
+
+		if (!name || !specialization || !rate) {
+		  return res.status(400).json({ message: 'Missing required fields: name, specialization, and rate.' });
+		}
+
+		let user = await User.findById(userId);
+
+		const therapist = await Therapist.create({
+			user: userId,
+			name,
+			specialization,
+			description: description || '',
+			qualifications: qualifications || [],
+			rate,
+			avatar: avatar || ''
+		});
+
+		user.role = 'therapist';
+		user.save();
+
+		return res.status(201).json({
+			message: 'Therapist onboarded successfully.',
+			therapist
+		})
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: `Error onboarding therapist: ${err.message}` });
+	}
+}
 
 // GET /therapists/:id 
 const getSingleTherapist = async (req, res) => {
@@ -198,6 +236,7 @@ const sendUpcomingAppointmentReminders = async (req, res) => {
 
 module.exports = {
   getAllTherapists,
+  onboardTherapist,
   getSingleTherapist,
   getAllAppointments,
   getSingleAppointment,
