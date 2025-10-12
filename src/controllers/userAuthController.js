@@ -15,35 +15,27 @@ exports.register = async (req, res) => {
   const { name, anonymousName, email, password, googleId, role, ...therapistData } = req.body;
 
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ msg: 'Email is already in use' });
     }
 
-    // Hash password 
-    let hashedPassword = null;
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      hashedPassword = await bcrypt.hash(password, salt);
-    }
-
+  
     const newUser = new User({
       name,
       email,
-      password: hashedPassword,
+      password: password,
       anonymousName: anonymousName?.toLowerCase(),
       googleId: googleId || null,
       role,
       ...therapistData,
     });
 
-    await newUser.save();
-
-   
+    console.log("SIGNUP: password from frontend =>", password);
+    
+    await newUser.save(); 
+    console.log('New user registered:', newUser.email);
     const token = generateToken(newUser._id, newUser.role, newUser.email);
-
-
     await sendVerificationLink.sendVerificationLink(newUser);
 
     res.status(201).json({
@@ -61,42 +53,61 @@ exports.register = async (req, res) => {
     res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
-// =========================
-// LOGIN (Unified)
-// =========================
+
+// ============================================
+// UPDATED LOGIN - Use the model's comparePassword method
+// ============================================
+
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
+    console.log('\n[LOGIN] Attempt:', { email });
 
-  const user = await User.findOne({ email });
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log('[LOGIN] ❌ User not found');
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
-  if (!user.password) {
-    return res.status(400).json({
-      message:
-        "This email was registered via Google. Please login with Google or reset your password.",
+    console.log('[LOGIN] ✅ User found:', user.email);
+
+    if (!user.password) {
+      return res.status(400).json({
+        message: "This account was created via Google. Please login with Google or reset your password.",
+      });
+    }
+
+    // Use the model's comparePassword method
+    const isMatch = await user.comparePassword(password);
+    console.log(`[LOGIN] Password match result: ${isMatch}`);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const accessToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "12h" }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    console.log('[LOGIN]  Login successful');
+    res.json({
+      message: "Login successful",
+      token: accessToken,
+      refreshToken,
+      user,
     });
+  } catch (error) {
+    console.error('[LOGIN ERROR]', error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
-
-  const accessToken = jwt.sign(
-    { id: user._id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "12h" }
-  );
-  const refreshToken = jwt.sign(
-    { id: user._id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
-
-  res.json({
-    message: "Login successful",
-    token: accessToken,
-    refreshToken,
-    user,
-  });
 };
 
 // =========================
