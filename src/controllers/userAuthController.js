@@ -16,12 +16,12 @@ exports.register = async (req, res) => {
 
   try {
     // Check if user already exists
-    let existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ msg: 'Email is already in use' });
     }
 
-    // Hash password only if provided (non-Google signups)
+    // Hash password 
     let hashedPassword = null;
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -31,8 +31,8 @@ exports.register = async (req, res) => {
     const newUser = new User({
       name,
       email,
-      password,
-      anonymousName: anonymousName.toLowerCase(),
+      password: hashedPassword,
+      anonymousName: anonymousName?.toLowerCase(),
       googleId: googleId || null,
       role,
       ...therapistData,
@@ -40,7 +40,9 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
-    const token = generateToken(User._id, User.role, User.email);
+   
+    const token = generateToken(newUser._id, newUser.role, newUser.email);
+
 
     await sendVerificationLink.sendVerificationLink(newUser);
 
@@ -51,16 +53,14 @@ exports.register = async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
-        message:
-          "User created successfully. Check email for verification link.",
       },
+      message: "User created successfully. Check email for verification link.",
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('REGISTER ERROR:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
-
 // =========================
 // LOGIN (Unified)
 // =========================
