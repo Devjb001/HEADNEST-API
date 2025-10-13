@@ -110,6 +110,35 @@ const retrieveMyTherapistProfile = async (req, res) => {
 	}
 }
 
+// PATCH /therapists/me
+const updateMyTherapistProfile = async (req, res) => {
+	try {
+		const therapist = await Therapist.findOne({ user: req.user.id }).populate('user');
+
+		if (!therapist) {
+			return res.status(404).json({ message: "Therapist profile for authenticated user not found." })
+		}
+
+		const { name, specialization, description, qualifications, rate, avatar } = req.body;
+
+		if (name) therapist.name = name;
+		if (specialization) therapist.specialization = specialization;
+		if (description) therapist.description = description;
+		if (qualifications) therapist.qualifications = qualifications;
+		if (rate) therapist.rate = rate;
+		if (avatar) therapist.avatar = avatar;
+
+		await therapist.save();
+
+		return res.status(200).json({
+			message: "Therapist profile updated successfully.",
+			therapist
+		})
+	} catch (err) {
+		res.status(500).json({error: err.message})
+	}
+}
+
 // DELETE /therapists/me
 const deleteMyTherapistProfile = async (req, res) => {
 	try {
@@ -277,6 +306,7 @@ module.exports = {
   onboardTherapist,
   getSingleTherapist,
   retrieveMyTherapistProfile,
+  updateMyTherapistProfile,
   deleteMyTherapistProfile,
   getAllAppointments,
   getSingleAppointment,
