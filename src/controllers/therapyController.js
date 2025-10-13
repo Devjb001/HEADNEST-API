@@ -41,8 +41,6 @@ const onboardTherapist = async (req, res) => {
 		const userId = req.user.id;
 		const { name, specialization, description, qualifications, rate, avatar } = req.body;
 
-		console.log(req.body);
-
 		if (!name || !specialization || !rate) {
 		  return res.status(400).json({ message: 'Missing required fields: name, specialization, and rate.' });
 		}
@@ -60,7 +58,7 @@ const onboardTherapist = async (req, res) => {
 		});
 
 		user.role = 'therapist';
-		user.save();
+		await user.save();
 
 		return res.status(201).json({
 			message: 'Therapist onboarded successfully.',
@@ -93,6 +91,28 @@ const getSingleTherapist = async (req, res) => {
     res.status(500).json({error: err.message})
   }
 };
+
+// DELETE /therapists/:id
+const deleteTherapistProfile = async (req, res) => {
+	try {
+		const userId = req.user.id;
+
+		const therapist = await Therapist.findOneAndDelete({ user: userId });
+		const user = await User.findById(userId);
+
+		if (!therapist) {
+			return res.status(404).json({ message: "Therapist profile for authenticated user not found." })
+		}
+
+		user.role = 'patient';
+		await user.save();
+
+		return res.status(204).json({ message: "Therapist profile deleted successfully."})
+	} catch (err) {
+		res.status(500).json({error: err.message})
+	}
+
+}
 
 // GET /appointments
 const getAllAppointments = async (req, res) => {
@@ -238,6 +258,7 @@ module.exports = {
   getAllTherapists,
   onboardTherapist,
   getSingleTherapist,
+  deleteTherapistProfile,
   getAllAppointments,
   getSingleAppointment,
   getUserAppointments,
