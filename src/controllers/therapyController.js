@@ -31,6 +31,7 @@ const getAllTherapists = async (req, res) => {
     }
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   }
 };
@@ -88,6 +89,7 @@ const getSingleTherapist = async (req, res) => {
     res.status(200).json(therapist);
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   }
 };
@@ -106,6 +108,7 @@ const retrieveMyTherapistProfile = async (req, res) => {
 			therapist
 		})
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({error: err.message})
 	}
 }
@@ -135,6 +138,7 @@ const updateMyTherapistProfile = async (req, res) => {
 			therapist
 		})
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({error: err.message})
 	}
 }
@@ -156,6 +160,7 @@ const deleteMyTherapistProfile = async (req, res) => {
 
 		return res.status(204).json({ message: "Therapist profile deleted successfully."})
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({error: err.message})
 	}
 
@@ -176,6 +181,7 @@ const getAllAppointments = async (req, res) => {
     }
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   } 
 };
@@ -221,6 +227,7 @@ const getUserAppointments = async (req, res) => {
     }
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   }
 }
