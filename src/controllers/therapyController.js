@@ -92,8 +92,26 @@ const getSingleTherapist = async (req, res) => {
   }
 };
 
-// DELETE /therapists/:id
-const deleteTherapistProfile = async (req, res) => {
+// GET /therapists/me
+const retrieveMyTherapistProfile = async (req, res) => {
+	try {
+		const therapist = await Therapist.findOne({ user: req.user.id }).populate('user');
+
+		if (!therapist) {
+			return res.status(404).json({ message: "Therapist profile for authenticated user not found." })
+		}
+
+		return res.status(200).json({
+			message: "Therapist profile retrieved successfully.",
+			therapist
+		})
+	} catch (err) {
+		res.status(500).json({error: err.message})
+	}
+}
+
+// DELETE /therapists/me
+const deleteMyTherapistProfile = async (req, res) => {
 	try {
 		const userId = req.user.id;
 
@@ -258,7 +276,8 @@ module.exports = {
   getAllTherapists,
   onboardTherapist,
   getSingleTherapist,
-  deleteTherapistProfile,
+  retrieveMyTherapistProfile,
+  deleteMyTherapistProfile,
   getAllAppointments,
   getSingleAppointment,
   getUserAppointments,
