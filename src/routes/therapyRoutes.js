@@ -4,6 +4,9 @@ const therapyController = require('../controllers/therapyController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
+router.get('/therapists/me', authMiddleware, therapyController.retrieveMyTherapistProfile);
+router.patch('/therapists/me', authMiddleware, therapyController.updateMyTherapistProfile);
+router.delete('/therapists/me', authMiddleware, therapyController.deleteMyTherapistProfile);
 router.get('/therapists/:therapistID', therapyController.getSingleTherapist);
 router.get('/therapists', therapyController.getAllTherapists);
 router.post('/therapists', authMiddleware, therapyController.onboardTherapist);

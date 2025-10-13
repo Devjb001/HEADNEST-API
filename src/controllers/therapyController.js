@@ -31,6 +31,7 @@ const getAllTherapists = async (req, res) => {
     }
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   }
 };
@@ -40,8 +41,6 @@ const onboardTherapist = async (req, res) => {
 	try {
 		const userId = req.user.id;
 		const { name, specialization, description, qualifications, rate, avatar } = req.body;
-
-		console.log(req.body);
 
 		if (!name || !specialization || !rate) {
 		  return res.status(400).json({ message: 'Missing required fields: name, specialization, and rate.' });
@@ -60,7 +59,7 @@ const onboardTherapist = async (req, res) => {
 		});
 
 		user.role = 'therapist';
-		user.save();
+		await user.save();
 
 		return res.status(201).json({
 			message: 'Therapist onboarded successfully.',
@@ -90,9 +89,82 @@ const getSingleTherapist = async (req, res) => {
     res.status(200).json(therapist);
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   }
 };
+
+// GET /therapists/me
+const retrieveMyTherapistProfile = async (req, res) => {
+	try {
+		const therapist = await Therapist.findOne({ user: req.user.id }).populate('user');
+
+		if (!therapist) {
+			return res.status(404).json({ message: "Therapist profile for authenticated user not found." })
+		}
+
+		return res.status(200).json({
+			message: "Therapist profile retrieved successfully.",
+			therapist
+		})
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({error: err.message})
+	}
+}
+
+// PATCH /therapists/me
+const updateMyTherapistProfile = async (req, res) => {
+	try {
+		const therapist = await Therapist.findOne({ user: req.user.id }).populate('user');
+
+		if (!therapist) {
+			return res.status(404).json({ message: "Therapist profile for authenticated user not found." })
+		}
+
+		const { name, specialization, description, qualifications, rate, avatar } = req.body;
+
+		if (name) therapist.name = name;
+		if (specialization) therapist.specialization = specialization;
+		if (description) therapist.description = description;
+		if (qualifications) therapist.qualifications = qualifications;
+		if (rate) therapist.rate = rate;
+		if (avatar) therapist.avatar = avatar;
+
+		await therapist.save();
+
+		return res.status(200).json({
+			message: "Therapist profile updated successfully.",
+			therapist
+		})
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({error: err.message})
+	}
+}
+
+// DELETE /therapists/me
+const deleteMyTherapistProfile = async (req, res) => {
+	try {
+		const userId = req.user.id;
+
+		const therapist = await Therapist.findOneAndDelete({ user: userId });
+		const user = await User.findById(userId);
+
+		if (!therapist) {
+			return res.status(404).json({ message: "Therapist profile for authenticated user not found." })
+		}
+
+		user.role = 'patient';
+		await user.save();
+
+		return res.status(204).json({ message: "Therapist profile deleted successfully."})
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({error: err.message})
+	}
+
+}
 
 // GET /appointments
 const getAllAppointments = async (req, res) => {
@@ -109,6 +181,7 @@ const getAllAppointments = async (req, res) => {
     }
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   } 
 };
@@ -154,6 +227,7 @@ const getUserAppointments = async (req, res) => {
     }
 
   } catch (err) {
+	console.error(err);
     res.status(500).json({error: err.message})
   }
 }
@@ -238,6 +312,9 @@ module.exports = {
   getAllTherapists,
   onboardTherapist,
   getSingleTherapist,
+  retrieveMyTherapistProfile,
+  updateMyTherapistProfile,
+  deleteMyTherapistProfile,
   getAllAppointments,
   getSingleAppointment,
   getUserAppointments,
